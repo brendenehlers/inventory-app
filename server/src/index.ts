@@ -1,7 +1,7 @@
 import express from 'express'
 import 'dotenv/config'
 import knex from 'knex'
-import _ from 'lodash'
+// import _ from 'lodash'
 import bodyParser from 'body-parser'
 import pkg from 'pg'
 const { DatabaseError } = pkg
@@ -76,14 +76,14 @@ app.post('/:name/add', async (req: TypedRequest<{name: string}, Record<string, u
 
 app.put('/:name/:id/update', async (req: TypedRequest<{name:string}&{id:string}, Record<string, unknown>, Update>, res) => {
   const { name, id } = req.params
-  const body: Update = req.body
+  const body = req.body
   try {
     const count = await storage(name).where({id}).update(body)
     if (count === 1) {
       const [newEntry] = await storage(name).where({id}).select('*')
       res.status(200).send(newEntry)
     } else {
-      res.status(404).send(error(`Product with id ${id} not found`))
+      res.status(404).send(error(`Product with id '${id}' not found`))
     }
   } catch (e) {
     if (e instanceof DatabaseError) {
@@ -104,7 +104,7 @@ app.put('/:name/:id/decrementAmt/:by', async (req, res) => {
         amt: currentAmt.amt - parseInt(by)
       })
     } else {
-      res.status(404).send(error(`${count}`))
+      res.status(404).send(error(`Table '${name}' doesn't have entry of id '${id}'`))
     }
   } catch (e) {
     if (e instanceof DatabaseError) {
@@ -125,7 +125,7 @@ app.put('/:name/:id/incrementAmt/:by',async (req, res) => {
         amt: currentAmt.amt + parseInt(by)
       })
     } else {
-      res.status(404).send(error(`${count}`))
+      res.status(404).send(error(`Table '${name}' doesn't have entry of id '${id}'`))
     }
   } catch (e) {
     if (e instanceof DatabaseError) {

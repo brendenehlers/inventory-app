@@ -1,11 +1,11 @@
 import { Request, Response } from 'express'
 
-export type RequestWithBody<T> = Request<Record<string, unknown>, Record<string, unknown>, T>
-export type ResponseWithBody<T> = Response<T>
+export type TypedRequest<Params, ResponseBody=Record<string, unknown>, RequestBody=Record<string, unknown>> = Request<Params, ResponseBody, RequestBody>
+export type ResponseWithBody<ResponseBody> = Response<ResponseBody>
 
 export type Add = {
   id: number
-  amt?: number
+  amt: number
   // product
   name?: string
   price?: number
@@ -15,5 +15,11 @@ export type Add = {
 
 
 export type Update = {
-  [key: string]: unknown
+  // product
+  name?: string
+  price?: number
+  amt_available?: number
+  // order
+  product_id?: number
+  amt?: number
 }

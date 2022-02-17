@@ -6,8 +6,8 @@ import bodyParser from 'body-parser'
 import pkg from 'pg'
 const { DatabaseError } = pkg
 
-import { Add, Update } from './schema'
-import { logger, error } from './logger'
+import { Add, TypedRequest, Update } from './schema'
+import { logger, error, success } from './logger'
 
 const app = express()
 app.use(bodyParser.json())
@@ -55,9 +55,9 @@ app.get('/:name/:id', async (req, res) => {
   }
 })
 
-app.post('/:name/add', async (req, res) => {
+app.post('/:name/add', async (req: TypedRequest<{name: string}, Record<string, unknown>, Add>, res) => {
   const { name } = req.params
-  const body: Add = req.body
+  const body = req.body
   try {
     const existingEntry = await storage(name).where({id: body.id}).select('id')
     if (!existingEntry.length) {
@@ -74,15 +74,58 @@ app.post('/:name/add', async (req, res) => {
   }
 })
 
-app.put('/:name/update/:id', async (req, res) => {
+app.put('/:name/:id/update', async (req: TypedRequest<{name:string}&{id:string}, Record<string, unknown>, Update>, res) => {
   const { name, id } = req.params
   const body: Update = req.body
   try {
     const count = await storage(name).where({id}).update(body)
     if (count === 1) {
-      res.status(200).send('successful')
+      const [newEntry] = await storage(name).where({id}).select('*')
+      res.status(200).send(newEntry)
     } else {
       res.status(404).send(error(`Product with id ${id} not found`))
+    }
+  } catch (e) {
+    if (e instanceof DatabaseError) {
+      res.status(500).send(error(e.message))
+    }
+  }
+})
+
+app.put('/:name/:id/decrementAmt/:by', async (req, res) => {
+  const { name, id, by } = req.params
+  try {
+    const [currentAmt] = await storage(name).where({id}).select('*')
+    const newAmt = currentAmt.amt - parseInt(by)
+    const count = await storage(name).where({id}).update({amt: newAmt})
+    if (count === 1) {
+      res.send({
+        ...currentAmt,
+        amt: currentAmt.amt - parseInt(by)
+      })
+    } else {
+      res.status(404).send(error(`${count}`))
+    }
+  } catch (e) {
+    if (e instanceof DatabaseError) {
+      res.status(500).send(error(e.message))
+    }
+  }
+})
+
+app.put('/:name/:id/incrementAmt/:by',async (req, res) => {
+  const { name, id, by } = req.params
+  try {
+    const [currentAmt] = await storage(name).where({id}).select('*')
+    const newAmt = currentAmt.amt + parseInt(by)
+    const count = await storage(name).where({id}).update({amt: newAmt})
+    if (count === 1) {
+      res.send({
+        ...currentAmt,
+        amt: currentAmt.amt + parseInt(by)
+      })
+    } else {
+      res.status(404).send(error(`${count}`))
     }
   } catch (e) {
     if (e instanceof DatabaseError) {

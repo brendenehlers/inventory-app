@@ -7,11 +7,11 @@ import pkg from 'pg'
 const { DatabaseError } = pkg
 
 import { Add, TypedRequest, Update } from './schema'
-import { logger, error, success } from './logger'
+import { logger, error } from './logger'
 
 const app = express()
 app.use(bodyParser.json())
-const port = 3001
+const port = process.env.PORT
 
 const storage = knex({
   client: 'pg',

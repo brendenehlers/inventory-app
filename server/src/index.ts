@@ -7,7 +7,8 @@ import pkg from 'pg'
 import cors from 'cors' 
 
 import { Add, TypedRequest, Update } from './schema'
-import { logger, error } from './logger'
+import { requestLogger, error } from './logger'
+import initialize from './init'
 
 const app = express()
 app.use(bodyParser.json())
@@ -20,9 +21,16 @@ const storage = knex({
   client: 'pg',
   connection: process.env.PG_CONNECTION_STRING
 })
+// need a way to only run this once
+storage.schema.hasTable('products').then((productsExists) => {
+  storage.schema.hasTable('orders').then((ordersExists) => {
+    if (!productsExists || !ordersExists) initialize(storage)
+  })
+})
+
 
 app.use((req, res, next) => {
-  logger(req)
+  requestLogger(req)
   next()
 })
 

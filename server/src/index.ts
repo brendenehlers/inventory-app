@@ -4,14 +4,17 @@ import knex from 'knex'
 // import _ from 'lodash'
 import bodyParser from 'body-parser'
 import pkg from 'pg'
-const { DatabaseError } = pkg
+import cors from 'cors' 
 
 import { Add, TypedRequest, Update } from './schema'
 import { logger, error } from './logger'
 
 const app = express()
 app.use(bodyParser.json())
+app.use(cors())
 const port = process.env.PORT
+
+const { DatabaseError } = pkg
 
 const storage = knex({
   client: 'pg',

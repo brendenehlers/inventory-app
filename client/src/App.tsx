@@ -20,12 +20,19 @@ const tempProfile: ProfileData = {
   imageURL: '/troy.jpg',
 }
 
-const columns: Column[] = [
-  {name: 'id', display: 'ID', visible: true, minWidth: '10%'},
-  {name: 'name', display: 'Name', visible: true, minWidth: '20%'},
-  {name: 'price', display: 'Price', visible: true, minWidth: '20%'},
-  {name: 'amt', display: 'Quantity', visible: true, minWidth: '20%'},
-]
+const columns: {[key: string]: Column[]} = {
+  products: [
+    {name: 'id', display: 'ID', visible: true, minWidth: '10%'},
+    {name: 'name', display: 'Name', visible: true, minWidth: '20%'},
+    {name: 'price', display: 'Price', visible: true, minWidth: '20%'},
+    {name: 'amt', display: 'Quantity', visible: true, minWidth: '20%'},
+  ], 
+  orders: [
+    {name: 'id', display: 'ID', visible: true, minWidth: '10%'},
+    {name: 'product_id', display: 'Product ID', visible: true, minWidth: '10%'},
+    {name: 'amt', display: 'Quality', visible: true, minWidth: '20%'},
+  ]
+}
 
 function App() {
   const [currentTab, setCurrentTab] = useState<keyof Data>('products')
@@ -61,14 +68,14 @@ function App() {
         {/* This is the navbar column */}
         <Grid item xs={12} sm={3} className='first'>
           <Sidebar profile={tempProfile}>
-            <Button>Products</Button>
-            <Button>Orders</Button>
+            <Button onClick={() => setCurrentTab('products')}>Products</Button>
+            <Button onClick={() => setCurrentTab('orders')}>Orders</Button>
           </Sidebar>
         </Grid>
         {/* This is the main content column */}
         <Grid item xs={12} sm={6} className='second'>
           <Table 
-            columns={columns}
+            columns={columns[currentTab]}
             data={data[currentTab]}
           />
         </Grid>

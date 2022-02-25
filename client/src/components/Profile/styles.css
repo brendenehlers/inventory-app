@@ -1,0 +1,45 @@
+.profile {
+  width: 95%;
+  /* background-color: lightblue; */
+  height: 100px;
+  margin-top: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+}
+
+.profile .picture {
+  border-radius: 100%;
+  aspect-ratio: 1;
+  width: 5rem;
+  min-width: 5rem;
+  margin: 5px;
+  margin-left: 5%;
+
+}
+
+.profile .picture.no-img {
+  background-color: grey;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile .info {
+  align-self: center;
+  text-align: start;
+  margin-left: 10px;
+  font-weight: 500;
+  max-width: 50%;
+  overflow: hidden;
+}
+
+.profile .manage {
+  display: flex;
+  align-self: end;
+  margin-left: 5px;
+}
+
+.info .title {
+  font-size: 20px;
+}

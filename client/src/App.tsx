@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import _ from 'lodash'
+import {Grid, Button} from '@mui/material'
 
 import './App.css'
+import Sidebar from './components/Sidebar/component'
+import { ProfileData } from './schema'
 
 type Product = {
   id: number
@@ -21,13 +24,19 @@ type Data = {
   orders: Order[]
 }
 
+const tempProfile: ProfileData = {
+  title: 'Troy Barnes', 
+  subtitle: 'Air Conditioning Repair Inc.',
+  imageURL: '/troy.jpg',
+}
+
 function App() {
   const [currentTab, setCurrentTab] = useState<keyof Data>('products')
   const [data, setData] = useState<Data>({products: [], orders: []})
 
 
   const getDataFromDB = async (table: string) => {
-    return (await (await fetch(`http://localhost:3001/${table}`)).json())
+    return (await (await fetch(`http://localhost:3001/${table}/50`)).json())
   }
 
   useEffect(() => {
@@ -43,33 +52,27 @@ function App() {
   }, [currentTab])
 
   return (
-    <div className="App">
-      <div className='navbar'>
-        <button onClick={() => setCurrentTab('products')}>Products</button>
-        <button onClick={() => setCurrentTab('orders')}>Orders</button>
-      </div>
-      <div className='content'>
-        {data[currentTab].length ? 
-          _.map(data[currentTab] as Array<any>, (entry: Product | Order) => {
-            if (currentTab === 'products') {
-              const product: Product = entry as Product
-              return (
-                <div id={`${product.id}`}>
-                  {product.name} ({product.amt}): {product.price}
-                </div>
-              )
-            }
-            if (currentTab === 'orders') {
-              const order: Order = entry as Order
-              return (
-                <div id={`${order.id}`}>
-                  Product ID: {order.product_id}, Amount: {order.amt}
-                </div>
-              )
-            }
-          })
-        : `Getting ${currentTab} data`}
-      </div>
+    <div className='App'>
+      <Grid
+        container
+        spacing={2}
+      >
+        {/* This is the navbar column */}
+        <Grid item xs={12} sm={3} className='first'>
+          <Sidebar profile={tempProfile}>
+            <Button>Products</Button>
+            <Button>Orders</Button>
+          </Sidebar>
+        </Grid>
+        {/* This is the main content column */}
+        <Grid item xs={12} sm={6} className='second'>
+          <div style={{height: '100vh'}}></div>
+        </Grid>
+        {/* This is the additional actions column */}
+        <Grid item xs={12} sm={3} className='third'>
+
+        </Grid>
+      </Grid>
     </div>
   )
 }

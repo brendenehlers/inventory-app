@@ -7,7 +7,7 @@ import pkg from 'pg'
 import cors from 'cors' 
 
 import { Add, TypedRequest, Update } from './schema'
-import { requestLogger, error } from './logger'
+import { requestLogger, logger, error } from './logger'
 import initialize from './init'
 
 const app = express()
@@ -28,7 +28,7 @@ storage.schema.hasTable('products').then((productsExists) => {
   })
 })
 
-
+// log each request to the console
 app.use((req, res, next) => {
   requestLogger(req)
   next()
@@ -38,6 +38,23 @@ app.get('/:name', async (req, res) => {
   const name = req.params.name
   try {
     const data = await storage(name).select('*')
+    if (data.length) {
+      res.send(data)
+    } else {
+      res.status(404).send(error(`Table '${name}' did not contain any values`))
+    }
+  } catch (e) {
+    if (e instanceof DatabaseError) {
+      res.status(404).send(error(`Table '${name}' not found`))
+    }
+  }
+})
+
+app.get('/:name/:limit', async (req, res) => {
+  const {name, limit: inLimit} = req.params
+  const limit = parseInt(inLimit)
+  try {
+    const data = await storage(name).select('*').limit(limit)
     if (data.length) {
       res.send(data)
     } else {
@@ -146,5 +163,5 @@ app.put('/:name/:id/incrementAmt/:by',async (req, res) => {
 })
 
 app.listen(port, () => {
-  return console.log(`Express is listening at http://localhost:${port}`)
+  return logger(`Express is listening at http://localhost:${port}`)
 })

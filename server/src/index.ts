@@ -17,14 +17,17 @@ const port = process.env.PORT
 
 const { DatabaseError } = pkg
 
-const storage = knex({
+const storage = knex<any, Record<string, any>[]>({
   client: 'pg',
   connection: process.env.PG_CONNECTION_STRING
 })
+
 // need a way to only run this once
 storage.schema.hasTable('products').then((productsExists) => {
   storage.schema.hasTable('orders').then((ordersExists) => {
-    if (!productsExists || !ordersExists) initialize(storage)
+    storage.schema.hasTable('customers').then((customersExists) => {
+      if (!productsExists || !ordersExists || !customersExists) initialize(storage)
+    })
   })
 })
 

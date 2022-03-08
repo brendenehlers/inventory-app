@@ -33,6 +33,29 @@ async function initialize(storage: Knex, loadData=true) {
         }
       }
     })
+
+    // check for customers table and create it if not there
+    storage.schema.hasTable('customers').then(async (exists) => {
+      if (!exists) {
+        logger('creating customers table')
+        await storage.schema.createTable('customers', (table) => {
+          table.increments('id')
+          table.string('first_name')
+          table.string('last_name')
+          table.string('email').notNullable()
+        })
+      }
+
+      if (loadData) {
+        logger('loading customer data')
+        const customers = [
+          {id: 1, first_name: 'Jon', last_name: 'Bon Jovi', email: 'jon@bonjovi.com'},
+          {id: 2, first_name: 'Donald', last_name: 'Glover', email: 'don.glove@gmail.com'},
+        ]
+        await storage('customers').insert(customers)
+      }
+    })
+
     // check for the orders table and create it if it doesn't exist
     storage.schema.hasTable('orders').then(async (exists) => {
       if (!exists) {
@@ -40,18 +63,20 @@ async function initialize(storage: Knex, loadData=true) {
         await storage.schema.createTable('orders', (table) => {
           table.increments('id')
           table.integer('product_id').notNullable()
+          table.integer('customer_id').notNullable()
           table.integer('amt').checkPositive().notNullable()
         })
         // change product_id column to have a foreign key constraint
         await storage.schema.table('orders', (table) => {
           table.foreign('product_id').references('products.id')
+          table.foreign('customer_id').references('customers.id')
         })
         logger('created orders table')
         if (loadData) { 
           logger('loading sample order data')
           const orders: Order[] = [
-            {id: 1, product_id: 1, amt: 3},
-            {id: 2, product_id: 3, amt: 2},
+            {id: 1, product_id: 1, amt: 3, customer_id: 1},
+            {id: 2, product_id: 3, amt: 2, customer_id: 2},
           ]
           await storage('orders').insert(orders)
         }

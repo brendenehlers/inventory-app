@@ -17,5 +17,13 @@ export type Product = {
 export type Order = {
   id: number
   product_id: number
+  customer_id: number
   amt: number
+}
+
+export type Customer = {
+  id: number
+  first_name: string
+  last_name: string
+  email: string
 }
